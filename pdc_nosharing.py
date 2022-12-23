@@ -109,7 +109,7 @@ class BasicBlock(nn.Module):
             s = '' if n_lconvs == 1 else 's'
             print('Define {} local {}{}{}.'.format(n_lconvs, key, typet, s))
             if typet == 'conv':
-                convl = partial(self.conv_layer, in_channels=planes, out_channels=out_planes,
+                convl = partial(nn.Conv2d, in_channels=planes, out_channels=out_planes,
                                 kernel_size=kern_loc, stride=1, padding=kern_loc > 1, bias=False)
             else:
                 convl = partial(nn.Linear, planes, planes)
@@ -128,7 +128,7 @@ class BasicBlock(nn.Module):
         """ Aux function to define the conv layers for the second order. """
         if out_planes is None:
             out_planes = planes
-        convl = partial(self.conv_layer, in_channels=planes, out_channels=out_planes,
+        convl = partial(nn.Conv2d, in_channels=planes, out_channels=out_planes,
                         kernel_size=kern_loc, stride=1, padding=kern_loc > 1, bias=False)
         setattr(self, 'u_conv{}'.format(key), convl())
         if key > 1:
