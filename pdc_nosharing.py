@@ -131,22 +131,18 @@ class BasicBlock(nn.Module):
         convl = partial(nn.Conv2d, in_channels=planes, out_channels=out_planes,
                         kernel_size=kern_loc, stride=1, padding=int(kern_loc > 1), bias=False)
         setattr(self, 'u_conv{}'.format(key), convl())
-        if key > 1:
-            pass
-        else:
-            setattr(self, 'ubn{}'.format(key), func_norm(out_planes))
+        setattr(self, 'ubn{}'.format(key), func_norm(out_planes))
 
     def apply_convs_so(self, input1, key=1):
         # # second order convs.
         out_uo = getattr(self, 'u_conv{}'.format(key))(input1)
-        key1 = key if key > 1 else 1
-        out_uo = self.uactiv(getattr(self, 'ubn{}'.format(key1))(out_uo))
+        out_uo = self.uactiv(getattr(self, 'ubn{}'.format(key))(out_uo))
         return out_uo
 
 
 
 class PDC(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10, norm_layer=None, out_activ=False, pool_adapt=False, 
+    def __init__(self, block, num_blocks, num_classes=10, norm_layer=None, out_activ=False, pool_adapt=False,
                  n_channels=[64, 128, 256, 512], planes_ho=None, ch_in=3, **kwargs):
         super(PDC, self).__init__()
         self.in_planes = n_channels[0]
