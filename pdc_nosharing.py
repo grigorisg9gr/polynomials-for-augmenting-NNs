@@ -110,7 +110,7 @@ class BasicBlock(nn.Module):
             print('Define {} local {}{}{}.'.format(n_lconvs, key, typet, s))
             if typet == 'conv':
                 convl = partial(nn.Conv2d, in_channels=planes, out_channels=out_planes,
-                                kernel_size=kern_loc, stride=1, padding=kern_loc > 1, bias=False)
+                                kernel_size=kern_loc, stride=1, padding=int(kern_loc > 1), bias=False)
             else:
                 convl = partial(nn.Linear, planes, planes)
             for i in range(n_lconvs):
@@ -123,13 +123,13 @@ class BasicBlock(nn.Module):
                 out_so = getattr(self, '{}conv{}'.format(key, i))(out_so)
                 out_so = self.lactiv(getattr(self, '{}bn{}'.format(key, i))(out_so))
         return out_so
-    
+
     def def_convs_so(self, planes, kern_loc, func_norm, key=1, out_planes=None):
         """ Aux function to define the conv layers for the second order. """
         if out_planes is None:
             out_planes = planes
         convl = partial(nn.Conv2d, in_channels=planes, out_channels=out_planes,
-                        kernel_size=kern_loc, stride=1, padding=kern_loc > 1, bias=False)
+                        kernel_size=kern_loc, stride=1, padding=int(kern_loc > 1), bias=False)
         setattr(self, 'u_conv{}'.format(key), convl())
         if key > 1:
             pass
@@ -179,7 +179,7 @@ class PDC(nn.Module):
                 setattr(self, 'layer{}'.format(j + 1), self._make_layer(block, n_channels[j], num_blocks[j], stride=1, **kwargs))
         self.linear = nn.Linear(n_channels[-1] * block.expansion, num_classes)
         # # if linear case and requested, include an output non-linearity.
-        cond = self.out_activ and self.activ(-100) == -100
+        cond = self.out_activ and self.activ(torch.tensor(-100)) == -100
         self.oactiv = partial(nn.ReLU(inplace=True)) if cond else lambda x: x
         print('output non-linearity: #', self.out_activ, cond)
 
